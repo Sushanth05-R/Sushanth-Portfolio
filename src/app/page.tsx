@@ -7,6 +7,7 @@ import { CustomCursor } from "@/components/ui/CustomCursor";
 import { IntroLoader } from "@/components/ui/IntroLoader";
 import { Navbar } from "@/components/ui/Navbar";
 import { Hero } from "@/components/sections/Hero";
+import { TechMarquee } from "@/components/ui/TechMarquee";
 import { About } from "@/components/sections/About";
 import { Experience } from "@/components/sections/Experience";
 import { Projects } from "@/components/sections/Projects";
@@ -39,6 +40,7 @@ export default function Home() {
           {/* Main Sections */}
           <main className="relative z-10 flex flex-col">
             <Hero onOpenResume={() => setIsResumeOpen(true)} />
+            <TechMarquee />
             <About />
             <Experience />
             <Projects />

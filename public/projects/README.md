@@ -6,3 +6,4 @@ Place your project screenshots here:
 - `feelitbuy.png` (Screenshot of Feel It Buy tri-app ecosystem)
 
 Then reference them in `src/components/sections/ProjectCard.tsx` and `src/components/sections/ProjectCaseStudyModal.tsx` as documented in the main README.md.
+

@@ -12,6 +12,7 @@ import {
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { PERSONAL_INFO } from "@/data/portfolioData";
 import { HeroCanvas } from "./HeroCanvas";
+import { TerminalCard } from "@/components/ui/TerminalCard";
 
 interface HeroProps {
   onOpenResume: () => void;
@@ -148,6 +149,16 @@ export function Hero({ onOpenResume }: HeroProps) {
               <LinkedinIcon className="w-4 h-4" />
             </a>
           </div>
+        </motion.div>
+
+        {/* Live Code Terminal Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.95 }}
+          className="w-full flex justify-center mb-10"
+        >
+          <TerminalCard />
         </motion.div>
 
         {/* Highlights Bar */}

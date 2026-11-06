@@ -9,7 +9,9 @@ import {
   ArrowRight,
   Sparkles,
   Bot,
-  ShoppingBag,
+  Mic,
+  Star,
+  Radio,
 } from "lucide-react";
 import { Project } from "@/types";
 
@@ -33,8 +35,8 @@ export function ProjectCard({
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 25 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 25 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["6deg", "-6deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-6deg", "6deg"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -57,7 +59,7 @@ export function ProjectCard({
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.6, delay: index * 0.15 }}
       style={{ perspective: 1200 }}
-      className="w-full"
+      className="w-full flex"
     >
       <motion.div
         ref={cardRef}
@@ -68,162 +70,212 @@ export function ProjectCard({
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="group relative rounded-3xl border border-white/10 bg-[#0b0f1a]/85 backdrop-blur-2xl p-6 sm:p-8 hover:border-emerald-500/40 transition-colors duration-300 shadow-xl"
+        className="group relative w-full flex flex-col justify-between rounded-3xl border border-white/10 bg-[#0b0f1a]/90 backdrop-blur-2xl p-6 sm:p-8 hover:border-emerald-500/40 transition-colors duration-300 shadow-xl"
       >
         {/* Glow ambient highlight */}
-        <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-emerald-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-emerald-500/5 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        {/* Top Meta Bar */}
-        <div className="flex items-center justify-between gap-2 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">
-              0{index + 1} &bull; {project.category}
-            </span>
-          </div>
-          {project.badge && (
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-mono font-medium ${
-                project.badge.includes("1st Place")
-                  ? "border border-amber-500/40 bg-amber-500/10 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-                  : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-              }`}
-            >
-              {project.badge.includes("1st Place") ? (
-                <Trophy className="w-3.5 h-3.5" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5" />
-              )}
-              <span>{project.badge}</span>
-            </span>
-          )}
-        </div>
-
-        {/* Title & Pitch */}
-        <div className="mb-6">
-          <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-emerald-400 transition-colors">
-            {project.title}
-          </h3>
-          <p className="text-xs sm:text-sm font-medium text-cyan-400 mt-1">
-            {project.subtitle}
-          </p>
-          <p className="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed line-clamp-3">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Visual Mockup & UI Simulation Container */}
-        {/* =========================================================================
-            PLACEHOLDER SCREENSHOT:
-            To replace this mockup with your real screenshots, replace this container with:
-            <div className="relative w-full h-56 rounded-2xl overflow-hidden mb-6">
-              <Image src="/projects/your-screenshot.png" alt={project.title} fill className="object-cover" />
+        <div>
+          {/* Top Meta Bar */}
+          <div className="flex items-center justify-between gap-2 mb-5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+                0{index + 1} &bull; {project.category}
+              </span>
             </div>
-            ========================================================================= */}
-        <div className="relative w-full rounded-2xl border border-white/10 bg-[#070b14] p-4 sm:p-5 mb-6 overflow-hidden min-h-[170px] flex flex-col justify-between">
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pb-3 border-b border-white/5">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {project.id === "evolish"
-                ? "AI Speech & RAG Module"
-                : project.id === "elevate-hire"
-                ? "AI Placement Simulator"
-                : "Tri-App Synchronized State"}
-            </span>
-            <span className="text-slate-500">60fps Live Preview</span>
+            {project.badge && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-mono font-medium ${
+                  project.badge.includes("1st Place")
+                    ? "border border-amber-500/40 bg-amber-500/10 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                    : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                }`}
+              >
+                {project.badge.includes("1st Place") ? (
+                  <Trophy className="w-3.5 h-3.5" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )}
+                <span>{project.badge}</span>
+              </span>
+            )}
           </div>
 
-          {/* Specialized visual content based on project */}
-          {project.id === "evolish" && (
-            <div className="py-3 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="flex items-center gap-1.5">
-                  <Bot className="w-4 h-4 text-emerald-400" />
-                  <span>Real-Time Speech Score</span>
-                </span>
-                <span className="font-mono text-emerald-400 font-bold">Band 8.5 / 9.0</span>
-              </div>
-              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 w-[88%] rounded-full" />
-              </div>
-              <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-400">
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  &quot;Talk to Book&quot; RAG
-                </span>
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  Razorpay Live
-                </span>
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  Offline Sync
-                </span>
-              </div>
-            </div>
-          )}
+          {/* Title & Pitch */}
+          <div className="mb-5">
+            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+              {project.title}
+            </h3>
+            <p className="text-xs sm:text-sm font-medium text-cyan-400 mt-1">
+              {project.subtitle}
+            </p>
+            <p className="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">
+              {project.description}
+            </p>
+          </div>
 
-          {project.id === "elevate-hire" && (
-            <div className="py-3 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
-                  <span>AI Mock Interview Feedback</span>
-                </span>
-                <span className="font-mono text-cyan-400 font-bold">94% Readiness</span>
+          {/* High-Fidelity Interactive Visual Simulation */}
+          {/* =========================================================================
+              PLACEHOLDER SCREENSHOT:
+              To replace this mockup with your real screenshots, replace this container with:
+              <div className="relative w-full h-56 rounded-2xl overflow-hidden mb-6">
+                <Image src="/projects/your-screenshot.png" alt={project.title} fill className="object-cover" />
               </div>
-              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-cyan-500 to-purple-400 w-[94%] rounded-full" />
-              </div>
-              <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-400">
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  Aptitude Modules
-                </span>
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  Peer Networking
-                </span>
-                <span className="rounded bg-white/5 px-2 py-0.5 border border-white/5">
-                  Real-Time Scoring
-                </span>
-              </div>
+              ========================================================================= */}
+          <div className="relative w-full rounded-2xl border border-white/10 bg-[#070b14] p-4 sm:p-5 mb-5 overflow-hidden">
+            {/* Header info */}
+            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pb-3 border-b border-white/5">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {project.id === "evolish"
+                  ? "AI Speech Analysis & RAG"
+                  : project.id === "elevate-hire"
+                  ? "AI Placement Simulator"
+                  : "Tri-App Logistics Mesh"}
+              </span>
+              <span className="text-slate-500">Architecture Blueprint</span>
             </div>
-          )}
 
-          {project.id === "feel-it-buy" && (
-            <div className="py-3 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="flex items-center gap-1.5">
-                  <ShoppingBag className="w-4 h-4 text-amber-400" />
-                  <span>3 Synchronized Client Apps</span>
-                </span>
-                <span className="font-mono text-amber-300 font-bold">1st Place Dev</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono pt-1">
-                <div className="rounded bg-white/5 p-1.5 border border-white/5 text-slate-300">
-                  User Flutter
-                </div>
-                <div className="rounded bg-white/5 p-1.5 border border-white/5 text-slate-300">
-                  Admin React
-                </div>
-                <div className="rounded bg-white/5 p-1.5 border border-white/5 text-slate-300">
-                  Driver Flutter
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+            {/* Evolish Mobile Visualizer */}
+            {project.id === "evolish" && (
+              <div className="py-3 space-y-3">
+                {/* Voice assessment waveform simulation */}
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-white">
+                      <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                      <span>Speaking Assessment (IELTS)</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                      Band 8.5
+                    </span>
+                  </div>
 
-        {/* Tech tags */}
-        <div className="flex flex-wrap gap-1.5 mb-6">
-          {project.tags.slice(0, 5).map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1 text-[11px] font-mono text-slate-300"
-            >
-              {tag}
-            </span>
-          ))}
-          {project.tags.length > 5 && (
-            <span className="inline-flex items-center rounded-lg border border-white/5 bg-white/[0.03] px-2 py-1 text-[11px] font-mono text-slate-500">
-              +{project.tags.length - 5}
-            </span>
-          )}
+                  {/* Animated Waveform Bars */}
+                  <div className="flex items-center justify-center gap-1 h-7 py-1">
+                    <span className="w-1 bg-emerald-400 rounded-full animate-wave-1" />
+                    <span className="w-1 bg-cyan-400 rounded-full animate-wave-2" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-wave-3" />
+                    <span className="w-1 bg-teal-400 rounded-full animate-wave-4" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-wave-5" />
+                    <span className="w-1 bg-cyan-400 rounded-full animate-wave-1" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-wave-3" />
+                    <span className="w-1 bg-teal-400 rounded-full animate-wave-2" />
+                    <span className="w-1 bg-emerald-400 rounded-full animate-wave-4" />
+                    <span className="w-1 bg-cyan-400 rounded-full animate-wave-5" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="rounded-lg bg-white/[0.03] p-2 border border-white/5 flex items-center justify-between">
+                    <span className="text-slate-400">Play Store</span>
+                    <span className="text-amber-400 flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-amber-400" />
+                      4.9 / 5
+                    </span>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] p-2 border border-white/5 flex items-center justify-between">
+                    <span className="text-slate-400">Payments</span>
+                    <span className="text-emerald-400">Razorpay Live</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ElevateHire Web Visualizer */}
+            {project.id === "elevate-hire" && (
+              <div className="py-3 space-y-3">
+                <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-white">
+                      <Bot className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>AI Mock Interviewer</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">
+                      94% Readiness
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-300 italic mb-2 line-clamp-1">
+                    &quot;Explain the trade-offs of PostgreSQL vs MongoDB in high-write scenarios.&quot;
+                  </p>
+
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-cyan-400 to-purple-400 w-[94%] rounded-full" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="rounded-lg bg-white/[0.03] p-2 border border-white/5 flex items-center justify-between">
+                    <span className="text-slate-400">Aptitude</span>
+                    <span className="text-cyan-400">AI Modules</span>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] p-2 border border-white/5 flex items-center justify-between">
+                    <span className="text-slate-400">Network</span>
+                    <span className="text-purple-400">Peer Forums</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Feel It Buy Tri-App Visualizer */}
+            {project.id === "feel-it-buy" && (
+              <div className="py-3 space-y-3">
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-300">
+                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <span>1st Place Winning Ecosystem</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                      Supabase Realtime
+                    </span>
+                  </div>
+
+                  {/* 3 Devices Synced */}
+                  <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono pt-1">
+                    <div className="rounded-lg bg-white/[0.04] p-1.5 border border-white/5">
+                      <span className="text-slate-400 block">📱 Shopper</span>
+                      <span className="text-emerald-400 font-semibold">Flutter</span>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] p-1.5 border border-white/5">
+                      <span className="text-slate-400 block">💻 Admin</span>
+                      <span className="text-cyan-400 font-semibold">React</span>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] p-1.5 border border-white/5">
+                      <span className="text-slate-400 block">🛵 Delivery</span>
+                      <span className="text-amber-300 font-semibold">Flutter</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    Sub-10ms WebSocket Sync
+                  </span>
+                  <span>PostgreSQL + RLS</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Tech tags */}
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {project.tags.slice(0, 5).map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-1 text-[11px] font-mono text-slate-300"
+              >
+                {tag}
+              </span>
+            ))}
+            {project.tags.length > 5 && (
+              <span className="inline-flex items-center rounded-lg border border-white/5 bg-white/[0.03] px-2 py-1 text-[11px] font-mono text-slate-500">
+                +{project.tags.length - 5}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Footer Actions */}
