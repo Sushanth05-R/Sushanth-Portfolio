@@ -2,15 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Radio, Cpu, Sparkles } from "lucide-react";
+import { Zap, Radio, Sparkles } from "lucide-react";
 import { sounds } from "@/utils/soundEffects";
 
-// High-performance GPU WebGL Shader replicating the hypnotic 3D organic reactor sphere from the video
+// High-precision GPU shader replicating the crisp 3D woven tentacle reactor sphere from the video
 const VERTEX_SHADER = `
 attribute vec2 position;
-varying vec2 vUv;
 void main() {
-  vUv = position * 0.5 + 0.5;
   gl_Position = vec4(position, 0.0, 1.0);
 }
 `;
@@ -21,129 +19,167 @@ uniform vec2 u_resolution;
 uniform float u_time;
 uniform vec2 u_mouse;
 uniform float u_pulse;
-varying vec2 vUv;
 
 #define PI 3.14159265359
 
-// Rotation matrix
-mat2 rot(float a) {
-  float s = sin(a), c = cos(a);
-  return mat2(c, -s, s, c);
+mat3 rotateY(float angle) {
+  float c = cos(angle);
+  float s = sin(angle);
+  return mat3(
+    c, 0.0, -s,
+    0.0, 1.0, 0.0,
+    s, 0.0, c
+  );
 }
 
-// 3D rotation around axis
-vec3 rotateY(vec3 p, float a) {
-  float c = cos(a), s = sin(a);
-  return vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z);
+mat3 rotateX(float angle) {
+  float c = cos(angle);
+  float s = sin(angle);
+  return mat3(
+    1.0, 0.0, 0.0,
+    0.0, c, s,
+    0.0, -s, c
+  );
 }
 
-vec3 rotateX(vec3 p, float a) {
-  float c = cos(a), s = sin(a);
-  return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z);
-}
-
-// Distance estimator for the organic ribbed reactor sphere
-float map(vec3 p) {
-  // Center radius
-  float r = length(p);
+// Procedural surface displacement of the woven porcelain tentacle strands
+float getDisplacement(vec3 p, out float outCavity, out float outRidge) {
+  float r = length(p.xy);
+  float theta = atan(p.y, p.x);
   
-  // Spherical coordinates
-  float theta = atan(p.z, p.x);
-  float phi = acos(clamp(p.y / (r + 0.0001), -1.0, 1.0));
+  // Center vortex / eye cavity
+  float cavity = smoothstep(0.06, 0.38, r);
+  outCavity = cavity;
   
-  // Ribbed tentacle ridges (swirling into the core)
-  float ribs = 42.0;
-  float twist = theta * ribs + phi * 12.0 + u_time * 1.5;
-  float ribDisplacement = sin(twist) * 0.045 * (1.0 - smoothstep(0.1, 1.3, r));
+  // Organic spiral twist for the strands
+  float twist = theta * 52.0 + sin(r * 11.0 - u_time * 1.3) * 2.0 + u_pulse * sin(r * 25.0);
   
-  // Inner torus / hollow core eye
-  float sphere = r - (0.95 + ribDisplacement + u_pulse * 0.05);
+  // Rounded rope/tentacle ridge profile
+  float s = sin(twist);
+  float ridge = pow(clamp(0.5 + 0.5 * s, 0.0, 1.0), 0.5);
+  outRidge = ridge;
   
-  // Carve out center vortex tunnel
-  float hole = length(p.xy) - 0.28 + sin(p.z * 5.0 + u_time) * 0.03;
+  // Micro-groove texture
+  float micro = sin(theta * 104.0 + r * 22.0) * 0.06;
   
-  return max(sphere, -hole);
-}
-
-vec3 calcNormal(vec3 p) {
-  vec2 e = vec2(0.003, 0.0);
-  return normalize(vec3(
-    map(p + e.xyy) - map(p - e.xyy),
-    map(p + e.yxy) - map(p - e.yxy),
-    map(p + e.yyx) - map(p - e.yyx)
-  ));
+  // Envelope tapering at outer edge and inner core
+  float envelope = smoothstep(0.12, 0.45, r) * smoothstep(1.05, 0.72, r);
+  
+  // Inner funnel dip
+  float dip = (1.0 - cavity) * -0.32;
+  
+  return (ridge * 0.095 + micro * 0.025) * envelope + dip;
 }
 
 void main() {
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
   
-  // Camera & Mouse rotation
-  vec3 ro = vec3(0.0, 0.0, 2.4);
-  vec3 rd = normalize(vec3(uv, -1.2));
+  // Frame scaling so the sphere sits inside with elegant breathing room
+  uv *= 2.15;
   
-  // Mouse tilt
-  float rotYAngle = (u_mouse.x - 0.5) * 1.6;
-  float rotXAngle = (u_mouse.y - 0.5) * 1.2;
+  // Smooth mouse tilt angles
+  float rotY = (u_mouse.x - 0.5) * 1.6;
+  float rotX = -(u_mouse.y - 0.5) * 1.3;
+  mat3 rot = rotateX(rotX) * rotateY(rotY);
   
-  ro = rotateY(ro, rotYAngle);
-  ro = rotateX(ro, rotXAngle);
-  rd = rotateY(rd, rotYAngle);
-  rd = rotateX(rd, rotXAngle);
+  vec3 ro = vec3(uv.x, uv.y, 2.5);
+  vec3 rd = vec3(0.0, 0.0, -1.0);
   
-  // Raymarch loop
-  float t = 0.0;
-  float hit = 0.0;
-  vec3 p = ro;
+  vec3 sphereCenter = vec3(0.0, 0.0, 0.0);
+  float sphereRadius = 0.88 + u_pulse * 0.035;
   
-  for(int i = 0; i < 70; i++) {
-    p = ro + rd * t;
-    float d = map(p);
-    if(d < 0.002) {
-      hit = 1.0;
-      break;
-    }
-    t += d * 0.7;
-    if(t > 4.5) break;
-  }
+  // Exact Ray-Sphere intersection
+  vec3 oc = ro - sphereCenter;
+  float b = dot(oc, rd);
+  float c = dot(oc, oc) - sphereRadius * sphereRadius;
+  float discriminant = b * b - c;
   
-  vec3 color = vec3(0.0);
+  vec3 finalColor = vec3(0.0);
+  float finalAlpha = 0.0;
   
-  // Background gradient
   float distFromCenter = length(uv);
   
-  // Inner Fiery Reactor Eye Glow (The Core)
-  float coreGlow = 0.08 / (distFromCenter * distFromCenter + 0.03);
-  vec3 plasmaFire = vec3(1.0, 0.45, 0.1) * coreGlow * 1.2;
-  vec3 emeraldAura = vec3(0.1, 0.9, 0.5) * (0.04 / (distFromCenter + 0.1));
-  color += plasmaFire + emeraldAura;
+  // Inner Radiant Plasma Core Bloom
+  float centerBloom = 0.042 / (distFromCenter * distFromCenter + 0.022);
+  vec3 coreFire = vec3(1.0, 0.45, 0.08) * centerBloom * 1.35;
+  vec3 coreHotWhite = vec3(1.0, 0.95, 0.7) * (0.012 / (distFromCenter * distFromCenter + 0.007));
   
-  if(hit > 0.5) {
-    vec3 n = calcNormal(p);
-    vec3 lightDir = normalize(vec3(0.8, 1.2, 1.5));
+  if (discriminant > 0.0) {
+    float t = -b - sqrt(discriminant);
+    vec3 hitPoint = ro + rd * t;
     
-    // Lighting components
-    float diff = max(dot(n, lightDir), 0.0);
-    float rim = pow(1.0 - max(dot(-rd, n), 0.0), 3.0);
+    // Rotate hitpoint by user mouse rotation
+    vec3 p = rot * hitPoint;
     
-    // Tentacle skin color (pearl white / titanium with ambient occlusion in crevice)
-    float r = length(p);
-    vec3 skin = mix(vec3(0.92, 0.94, 0.97), vec3(0.35, 0.38, 0.45), smoothstep(0.4, 1.0, r));
+    float cavity = 0.0;
+    float ridge = 0.0;
+    float disp = getDisplacement(p, cavity, ridge);
     
-    // Internal thermal emissive light radiating from within the hollow eye
-    float innerHeat = smoothstep(0.8, 0.25, length(p.xy));
-    vec3 heatGlow = vec3(1.0, 0.6, 0.15) * innerHeat * 3.5;
+    // Analytic surface gradient perturbation
+    vec2 eps = vec2(0.004, 0.0);
+    float d1, d2;
+    float dX = getDisplacement(p + eps.xyy, d1, d2) - getDisplacement(p - eps.xyy, d1, d2);
+    float dY = getDisplacement(p + eps.yxy, d1, d2) - getDisplacement(p - eps.yxy, d1, d2);
     
-    vec3 shaded = skin * (diff * 0.7 + 0.3) + rim * vec3(0.4, 0.8, 0.7) * 0.6 + heatGlow;
-    color = mix(color, shaded, 0.92);
+    vec3 baseNormal = normalize(p);
+    vec3 perturbedNormal = normalize(baseNormal + vec3(-dX * 18.0, -dY * 18.0, 0.0));
+    
+    // Re-orient normal into world view space
+    mat3 invRot = rotateY(-rotY) * rotateX(-rotX);
+    vec3 worldNormal = invRot * perturbedNormal;
+    
+    // 3-point studio lighting
+    vec3 light1 = normalize(vec3(0.65, 0.85, 1.2));  // Key light (top-left)
+    vec3 light2 = normalize(vec3(-0.75, -0.4, 0.6)); // Soft fill light
+    
+    float diff1 = max(dot(worldNormal, light1), 0.0);
+    float diff2 = max(dot(worldNormal, light2), 0.0) * 0.35;
+    
+    // Sharp specular shine on porcelain rope
+    vec3 halfVec = normalize(light1 - rd);
+    float spec = pow(max(dot(worldNormal, halfVec), 0.0), 34.0) * 0.45;
+    
+    // Ambient occlusion in strand grooves
+    float ao = smoothstep(0.12, 0.88, ridge);
+    
+    // Clean porcelain/titanium body
+    vec3 porcelain = mix(vec3(0.38, 0.42, 0.48), vec3(0.96, 0.97, 0.99), ridge);
+    vec3 litSurface = porcelain * (diff1 * 0.78 + diff2 + 0.26) * ao + spec;
+    
+    // Rim lighting (Fresnel)
+    float fresnel = pow(1.0 - max(dot(-rd, worldNormal), 0.0), 3.0);
+    litSurface += vec3(0.35, 0.75, 0.7) * fresnel * 0.38;
+    
+    // Inner thermal glow radiating through the strands
+    float r = length(p.xy);
+    float innerHeat = smoothstep(0.52, 0.14, r);
+    vec3 heatColor = mix(vec3(1.0, 0.32, 0.05), vec3(1.0, 0.86, 0.3), smoothstep(0.32, 0.08, r));
+    litSurface = mix(litSurface, heatColor * 2.2, innerHeat * (1.0 - cavity * 0.55));
+    
+    // Deep center vortex plasma exposure
+    if (cavity < 0.28) {
+      float coreFactor = 1.0 - cavity / 0.28;
+      vec3 plasma = mix(vec3(1.0, 0.5, 0.1), vec3(1.0, 0.98, 0.85), coreFactor);
+      litSurface = mix(litSurface, plasma * 3.2, coreFactor);
+    }
+    
+    // Anti-aliased outer edge
+    float edgeDist = length(hitPoint.xy) / sphereRadius;
+    float edgeAlpha = smoothstep(1.0, 0.975, edgeDist);
+    
+    finalColor = litSurface;
+    finalAlpha = edgeAlpha;
   }
   
-  // Subtle vignette
-  color *= smoothstep(1.2, 0.3, distFromCenter);
+  // Add volumetric fiery bloom radiating outward
+  finalColor += coreFire + coreHotWhite;
+  finalAlpha = max(finalAlpha, clamp(centerBloom * 0.8, 0.0, 1.0));
   
-  // Alpha blending: transparent around the edges so it embeds seamlessly into the dark UI
-  float alpha = smoothstep(1.3, 0.1, distFromCenter);
+  // Clean falloff at boundary
+  finalColor *= smoothstep(1.8, 0.2, distFromCenter);
+  finalAlpha *= smoothstep(1.9, 0.7, distFromCenter);
   
-  gl_FragColor = vec4(color, alpha);
+  gl_FragColor = vec4(finalColor, finalAlpha);
 }
 `;
 
@@ -155,7 +191,6 @@ export function QuantumReactorCore() {
   const pulseRef = useRef(0);
 
   useEffect(() => {
-    // Check reduced motion
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
@@ -165,7 +200,6 @@ export function QuantumReactorCore() {
     const gl = canvas.getContext("webgl", { alpha: true, antialias: true, powerPreference: "high-performance" });
     if (!gl) return;
 
-    // Helper: compile shader
     const compileShader = (type: number, source: string) => {
       const shader = gl.createShader(type);
       if (!shader) return null;
@@ -191,7 +225,6 @@ export function QuantumReactorCore() {
 
     gl.useProgram(program);
 
-    // Quad geometry
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(
@@ -204,13 +237,11 @@ export function QuantumReactorCore() {
     gl.enableVertexAttribArray(posAttr);
     gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
 
-    // Uniform locations
     const uRes = gl.getUniformLocation(program, "u_resolution");
     const uTime = gl.getUniformLocation(program, "u_time");
     const uMouse = gl.getUniformLocation(program, "u_mouse");
     const uPulse = gl.getUniformLocation(program, "u_pulse");
 
-    // Sizing
     const resize = () => {
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
@@ -238,16 +269,13 @@ export function QuantumReactorCore() {
     let animId: number;
     const startTime = performance.now();
 
-    // Render loop
     const render = (now: number) => {
       const elapsed = (now - startTime) * 0.001;
 
-      // Mouse smoothing
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
+      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.06;
+      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.06;
 
-      // Pulse decay
-      pulseRef.current *= 0.95;
+      pulseRef.current *= 0.94;
 
       gl.uniform1f(uTime, elapsed);
       gl.uniform2f(uMouse, mouseRef.current.x, mouseRef.current.y);
@@ -260,7 +288,6 @@ export function QuantumReactorCore() {
 
     animId = requestAnimationFrame(render);
 
-    // Subtle temp flicker interval
     const tempInterval = setInterval(() => {
       setCoreTemp(3400 + Math.floor(Math.random() * 25));
     }, 1200);
@@ -285,56 +312,54 @@ export function QuantumReactorCore() {
   };
 
   return (
-    <div className="relative w-full max-w-[460px] sm:max-w-[520px] aspect-square flex items-center justify-center select-none group">
-      {/* Sci-Fi HUD Crosshairs & Telemetry Markers */}
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-2 font-mono text-[10px] text-slate-400 z-10">
-        {/* Top telemetry brackets */}
+    <div className="relative w-full max-w-[480px] lg:max-w-[540px] aspect-square flex items-center justify-center select-none">
+      {/* Subtle outer tech telemetry brackets - placed cleanly away from the sphere */}
+      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-3 font-mono text-[10px] text-slate-400 z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-2 py-1 backdrop-blur-md">
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-[#070b14]/80 px-3 py-1 backdrop-blur-md">
             <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
             <span className="text-emerald-400 font-bold">[CORE_TEMP: {coreTemp}&deg;K]</span>
           </div>
 
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-2 py-1 backdrop-blur-md">
-            <Cpu className="w-3 h-3 text-cyan-400" />
-            <span className="text-cyan-300">[QUANT_SYNC: 99.8%]</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-[#070b14]/80 px-3 py-1 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="text-cyan-300 font-medium">[QUANTUM_SYNC: 99.8%]</span>
           </div>
         </div>
 
-        {/* Center alignment crosshair rings */}
-        <div className="absolute inset-10 rounded-full border border-emerald-500/10 pointer-events-none border-dashed animate-[spin_60s_linear_infinite]" />
-        <div className="absolute inset-20 rounded-full border border-cyan-500/10 pointer-events-none" />
+        {/* Ambient dashed orbital rings */}
+        <div className="absolute inset-6 rounded-full border border-emerald-500/10 pointer-events-none border-dashed animate-[spin_80s_linear_infinite]" />
+        <div className="absolute inset-16 rounded-full border border-white/5 pointer-events-none" />
 
-        {/* Bottom telemetry brackets */}
         <div className="flex items-center justify-between">
-          <div className="rounded-lg border border-white/10 bg-black/60 px-2 py-1 backdrop-blur-md text-slate-400">
-            <span>AXIS: 13.34&deg;N // 74.74&deg;E</span>
+          <div className="rounded-full border border-white/10 bg-[#070b14]/80 px-3 py-1 backdrop-blur-md text-slate-400 text-[10px]">
+            <span>COORDS: 13.34&deg;N // 74.74&deg;E</span>
           </div>
 
-          <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-1 backdrop-blur-md text-amber-300 font-semibold">
+          <div className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-[#070b14]/80 px-3 py-1 backdrop-blur-md text-amber-300 font-semibold text-[10px]">
             <Zap className="w-3 h-3 fill-amber-300" />
-            <span>{isSurging ? "PLASMA SURGE" : "FUSION ACTIVE"}</span>
+            <span>{isSurging ? "PLASMA BURST" : "FUSION ACTIVE"}</span>
           </div>
         </div>
       </div>
 
-      {/* Interactive 3D WebGL Canvas */}
+      {/* 3D WebGL Canvas */}
       <canvas
         ref={canvasRef}
         onClick={handleCoreClick}
-        className="w-full h-full cursor-pointer transition-transform duration-300 active:scale-95 z-0"
-        title="Click to trigger energy pulse"
+        className="w-full h-full cursor-pointer transition-transform duration-300 hover:scale-[1.02] active:scale-95 z-0"
+        title="Interactive 3D Quantum Reactor Sphere - Move mouse to rotate, click to pulse"
       />
 
-      {/* Floating Interactive Badge */}
+      {/* Subtle Bottom Interactive Hint */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleCoreClick}
-        className="absolute bottom-5 z-20 rounded-full border border-emerald-500/40 bg-[#070b14]/90 px-3.5 py-1 text-[11px] font-mono text-emerald-300 backdrop-blur-xl shadow-lg shadow-emerald-500/20 hover:border-emerald-400 hover:text-white transition-colors flex items-center gap-1.5"
+        className="absolute -bottom-2 z-20 rounded-full border border-emerald-500/40 bg-[#070b14]/90 px-4 py-1.5 text-[11px] font-mono text-emerald-300 backdrop-blur-xl shadow-lg shadow-emerald-500/20 hover:border-emerald-400 hover:text-white transition-all flex items-center gap-2"
       >
-        <Sparkles className="w-3 h-3 text-emerald-400" />
-        <span>Interact with 3D Core</span>
+        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+        <span>Click to Pulse Core</span>
       </motion.button>
     </div>
   );
