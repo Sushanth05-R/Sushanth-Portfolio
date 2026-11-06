@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 import {
   X,
   ExternalLink,
@@ -22,16 +23,16 @@ export function ProjectCaseStudyModal({
   project,
   onClose,
 }: ProjectCaseStudyModalProps) {
+  useModalScrollLock(!!project);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     if (project) {
-      document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => {
-      document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [project, onClose]);
@@ -40,7 +41,7 @@ export function ProjectCaseStudyModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -52,11 +53,12 @@ export function ProjectCaseStudyModal({
 
         {/* Modal Window */}
         <motion.div
+          data-lenis-prevent="true"
           initial={{ opacity: 0, scale: 0.94, y: 25 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 25 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#0a0e1a] text-slate-200 shadow-2xl p-6 sm:p-10 z-10"
+          className="relative w-full max-w-4xl max-h-[88vh] overflow-y-auto overscroll-contain rounded-3xl border border-white/10 bg-[#0a0e1a] text-slate-200 shadow-2xl p-6 sm:p-10 z-10"
         >
           {/* Header Action Bar */}
           <div className="flex items-center justify-between pb-6 border-b border-white/10">

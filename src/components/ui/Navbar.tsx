@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sun,
@@ -30,6 +31,8 @@ export function Navbar({ onOpenResume }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  useModalScrollLock(mobileMenuOpen);
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -173,6 +176,7 @@ export function Navbar({ onOpenResume }: NavbarProps) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            data-lenis-prevent="true"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

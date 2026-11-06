@@ -70,6 +70,25 @@ svg:not([width]) {
   background: rgba(16, 185, 129, 0.4);
 }
 
+/* Modal Inner Scrollbars */
+[data-lenis-prevent] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.35) transparent;
+}
+[data-lenis-prevent]::-webkit-scrollbar {
+  width: 6px;
+}
+[data-lenis-prevent]::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-lenis-prevent]::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+}
+[data-lenis-prevent]::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
+}
+
 /* Smooth glassmorphic card */
 .glass-panel {
   background: var(--bg-card);
