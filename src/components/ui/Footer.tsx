@@ -47,7 +47,9 @@ export function Footer() {
             </p>
             <p className="text-[11px] font-mono text-slate-500 flex items-center justify-center sm:justify-start gap-1.5 mt-0.5">
               <Clock className="w-3 h-3 text-emerald-400" />
-              <span>Udupi, IN (IST): {localTime || "Loading..."}</span>
+              <span suppressHydrationWarning>
+                Udupi, IN (IST): {localTime || "Active"}
+              </span>
             </p>
           </div>
         </div>

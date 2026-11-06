@@ -4,41 +4,29 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function IntroLoader() {
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !sessionStorage.getItem("sushanth_intro_seen");
-    }
-    return true;
-  });
+  const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (!loading) return;
-
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + 10;
+        return prev + 14;
       });
     }, 90);
 
     const timer = setTimeout(() => {
       setLoading(false);
-      try {
-        sessionStorage.setItem("sushanth_intro_seen", "true");
-      } catch {
-        // Ignore session storage errors
-      }
-    }, 1250);
+    }, 1150);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [loading]);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -48,9 +36,9 @@ export function IntroLoader() {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            y: -30,
-            filter: "blur(8px)",
-            transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+            y: -20,
+            filter: "blur(6px)",
+            transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
           }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05070d] text-white"
         >
@@ -96,12 +84,12 @@ export function IntroLoader() {
               <motion.div
                 className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full"
                 initial={{ width: "0%" }}
-                animate={{ width: `${progress}%` }}
+                animate={{ width: `${Math.min(progress, 100)}%` }}
                 transition={{ ease: "easeOut", duration: 0.1 }}
               />
             </div>
             <span className="mt-2 text-[10px] font-mono text-slate-500">
-              {progress}%
+              {Math.min(progress, 100)}%
             </span>
           </div>
         </motion.div>
