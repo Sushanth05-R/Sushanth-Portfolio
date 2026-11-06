@@ -146,16 +146,14 @@ The contact form is configured to use [Web3Forms](https://web3forms.com/) for ze
 
 1. **Commit and Push to GitHub**:
    ```bash
-   git add .
-   git commit -m "feat: world-class portfolio for Sushanth R"
    git branch -M main
-   git remote add origin https://github.com/Sushanth05-R/portfolio.git
+   git remote add origin https://github.com/Sushanth05-R/Sushanth-Portfolio.git
    git push -u origin main
    ```
 
 2. **Deploy on Vercel**:
    - Go to [vercel.com](https://vercel.com/) and sign in with GitHub.
-   - Click **Add New Project** and select your `portfolio` repository.
+   - Click **Add New Project** and select your `Sushanth-Portfolio` repository.
    - Under **Environment Variables**, add:
      - `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` = your Web3Forms key
    - Click **Deploy**. Vercel will build and assign your free production URL (e.g. `https://sushanth-r.vercel.app`).
