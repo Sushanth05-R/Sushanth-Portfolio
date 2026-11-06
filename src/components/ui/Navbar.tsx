@@ -173,15 +173,24 @@ export function Navbar({ onOpenResume, onOpenCommand }: NavbarProps) {
               <span className="hidden sm:inline">⌘K</span>
             </button>
 
-            {/* Synthesized Audio FX Toggle */}
+            {/* Synthesized Audio FX Toggle with Live Equalizer */}
             <button
               onClick={handleToggleAudio}
-              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-              title={audioEnabled ? "Mute Sound Effects" : "Enable Sound Effects"}
+              className={`relative flex items-center gap-1.5 h-8 rounded-full border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors ${
+                audioEnabled ? "px-2.5" : "w-8 justify-center"
+              }`}
+              title={audioEnabled ? "Mute Sound Effects" : "Enable Cybernetic Audio"}
               aria-label="Toggle sound effects"
             >
               {audioEnabled ? (
-                <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+                <>
+                  <Volume2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span className="flex items-end gap-[2px] h-3">
+                    <span className="w-[2px] bg-emerald-400 rounded-full animate-wave-1" />
+                    <span className="w-[2px] bg-cyan-400 rounded-full animate-wave-2" />
+                    <span className="w-[2px] bg-emerald-300 rounded-full animate-wave-3" />
+                  </span>
+                </>
               ) : (
                 <VolumeX className="h-3.5 w-3.5 text-slate-500" />
               )}

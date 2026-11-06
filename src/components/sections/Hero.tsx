@@ -13,6 +13,7 @@ import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { PERSONAL_INFO } from "@/data/portfolioData";
 import { HeroCanvas } from "./HeroCanvas";
 import { TerminalCard } from "@/components/ui/TerminalCard";
+import { DecryptedText } from "@/components/ui/DecryptedText";
 
 interface HeroProps {
   onOpenResume: () => void;
@@ -75,7 +76,7 @@ export function Hero({ onOpenResume }: HeroProps) {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="flex items-center justify-center gap-2 text-lg sm:text-2xl md:text-3xl font-semibold tracking-tight text-gradient-accent mb-4"
         >
-          <span>{PERSONAL_INFO.role}</span>
+          <DecryptedText text={PERSONAL_INFO.role} speed={25} />
         </motion.div>
 
         {/* Location & Academic Note */}

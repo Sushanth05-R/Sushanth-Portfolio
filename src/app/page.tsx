@@ -8,6 +8,7 @@ import { CursorSpotlight } from "@/components/ui/CursorSpotlight";
 import { IntroLoader } from "@/components/ui/IntroLoader";
 import { Navbar } from "@/components/ui/Navbar";
 import { CommandMenu } from "@/components/ui/CommandMenu";
+import { TelemetryHUD } from "@/components/ui/TelemetryHUD";
 import { Hero } from "@/components/sections/Hero";
 import { TechMarquee } from "@/components/ui/TechMarquee";
 import { About } from "@/components/sections/About";
@@ -74,6 +75,9 @@ export default function Home() {
             onClose={() => setIsCommandOpen(false)}
             onOpenResume={() => setIsResumeOpen(true)}
           />
+
+          {/* Futuristic Cyber Telemetry HUD & Warp Controller */}
+          <TelemetryHUD />
         </div>
       </SmoothScroll>
     </ThemeProvider>
