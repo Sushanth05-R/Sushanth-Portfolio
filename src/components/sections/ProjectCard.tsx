@@ -19,12 +19,14 @@ interface ProjectCardProps {
   project: Project;
   index: number;
   onOpenCaseStudy: (project: Project) => void;
+  onOpenAIDemo?: () => void;
 }
 
 export function ProjectCard({
   project,
   index,
   onOpenCaseStudy,
+  onOpenAIDemo,
 }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
 
@@ -179,6 +181,19 @@ export function ProjectCard({
                     <span className="text-emerald-400">Razorpay Live</span>
                   </div>
                 </div>
+
+                {onOpenAIDemo && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenAIDemo();
+                    }}
+                    className="w-full mt-2 py-2 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-[11px] font-mono text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Launch Interactive Speech &amp; RAG Simulator</span>
+                  </button>
+                )}
               </div>
             )}
 

@@ -5,9 +5,12 @@ import { PROJECTS } from "@/data/portfolioData";
 import { Project } from "@/types";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectCaseStudyModal } from "./ProjectCaseStudyModal";
+import { AISpeechDemoModal } from "@/components/ui/AISpeechDemoModal";
+import { sounds } from "@/utils/soundEffects";
 
 export function Projects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isAIDemoOpen, setIsAIDemoOpen] = useState(false);
   const [filter, setFilter] = useState<string>("All");
 
   const categories = ["All", "Mobile", "Web & AI", "E-Commerce / Ecosystem"];
@@ -38,7 +41,10 @@ export function Projects() {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setFilter(cat)}
+                onClick={() => {
+                  setFilter(cat);
+                  sounds.playHover();
+                }}
                 className={`rounded-xl px-3.5 py-1.5 text-xs font-mono transition-all duration-200 ${
                   filter === cat
                     ? "bg-emerald-500 text-black font-semibold shadow-md shadow-emerald-500/20"
@@ -59,6 +65,7 @@ export function Projects() {
               project={project}
               index={idx}
               onOpenCaseStudy={(proj) => setSelectedProject(proj)}
+              onOpenAIDemo={() => setIsAIDemoOpen(true)}
             />
           ))}
         </div>
@@ -67,6 +74,12 @@ export function Projects() {
         <ProjectCaseStudyModal
           project={selectedProject}
           onClose={() => setSelectedProject(null)}
+        />
+
+        {/* Interactive Evolish Speech & RAG Playground Modal */}
+        <AISpeechDemoModal
+          isOpen={isAIDemoOpen}
+          onClose={() => setIsAIDemoOpen(false)}
         />
       </div>
     </section>

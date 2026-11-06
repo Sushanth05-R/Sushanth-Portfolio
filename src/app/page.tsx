@@ -4,8 +4,10 @@ import { useState } from "react";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { CustomCursor } from "@/components/ui/CustomCursor";
+import { CursorSpotlight } from "@/components/ui/CursorSpotlight";
 import { IntroLoader } from "@/components/ui/IntroLoader";
 import { Navbar } from "@/components/ui/Navbar";
+import { CommandMenu } from "@/components/ui/CommandMenu";
 import { Hero } from "@/components/sections/Hero";
 import { TechMarquee } from "@/components/ui/TechMarquee";
 import { About } from "@/components/sections/About";
@@ -20,6 +22,7 @@ import { ResumeModal } from "@/components/ui/ResumeModal";
 
 export default function Home() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
 
   return (
     <ThemeProvider>
@@ -28,6 +31,9 @@ export default function Home() {
           {/* Subtle noise / ambient background grid */}
           <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />
 
+          {/* Dynamic Cursor Spotlight Effect */}
+          <CursorSpotlight />
+
           {/* 1.2s Cinematic Intro Loader */}
           <IntroLoader />
 
@@ -35,7 +41,10 @@ export default function Home() {
           <CustomCursor />
 
           {/* Sticky Navigation Bar */}
-          <Navbar onOpenResume={() => setIsResumeOpen(true)} />
+          <Navbar
+            onOpenResume={() => setIsResumeOpen(true)}
+            onOpenCommand={() => setIsCommandOpen(true)}
+          />
 
           {/* Main Sections */}
           <main className="relative z-10 flex flex-col">
@@ -57,6 +66,13 @@ export default function Home() {
           <ResumeModal
             isOpen={isResumeOpen}
             onClose={() => setIsResumeOpen(false)}
+          />
+
+          {/* Quick Command HUD Palette (Cmd + K / Ctrl + K) */}
+          <CommandMenu
+            isOpen={isCommandOpen}
+            onClose={() => setIsCommandOpen(false)}
+            onOpenResume={() => setIsResumeOpen(true)}
           />
         </div>
       </SmoothScroll>

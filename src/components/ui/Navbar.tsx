@@ -3,6 +3,7 @@
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { sounds } from "@/utils/soundEffects";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sun,
@@ -11,10 +12,14 @@ import {
   X,
   FileText,
   Sparkles,
+  Search,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 interface NavbarProps {
   onOpenResume: () => void;
+  onOpenCommand: () => void;
 }
 
 const NAV_ITEMS = [
@@ -26,13 +31,15 @@ const NAV_ITEMS = [
   { name: "Contact", href: "#contact" },
 ];
 
-export function Navbar({ onOpenResume }: NavbarProps) {
+export function Navbar({ onOpenResume, onOpenCommand }: NavbarProps) {
   const [activeSection, setActiveSection] = useState("hero");
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(sounds.enabled);
   const { theme, setTheme } = useTheme();
 
   useModalScrollLock(mobileMenuOpen);
+
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -55,18 +62,35 @@ export function Navbar({ onOpenResume }: NavbarProps) {
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        onOpenCommand();
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onOpenCommand]);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    sounds.playHover();
     const id = href.replace("#", "");
     const target = document.getElementById(id);
     if (target) {
       setMobileMenuOpen(false);
       target.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const handleToggleAudio = () => {
+    const next = sounds.toggle();
+    setAudioEnabled(next);
   };
 
   return (
@@ -82,7 +106,7 @@ export function Navbar({ onOpenResume }: NavbarProps) {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className={`flex items-center justify-between w-full max-w-5xl rounded-full border transition-all duration-300 ${
             isScrolled
-              ? "border-white/10 bg-[#070a13]/80 backdrop-blur-xl shadow-lg shadow-black/30 px-4 py-2"
+              ? "border-white/10 bg-[#070a13]/85 backdrop-blur-xl shadow-lg shadow-black/30 px-4 py-2"
               : "border-transparent bg-transparent px-2 py-1"
           }`}
         >
@@ -135,11 +159,41 @@ export function Navbar({ onOpenResume }: NavbarProps) {
           </div>
 
           {/* Right Action Cluster */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Quick Command HUD Button (Cmd+K) */}
+            <button
+              onClick={() => {
+                sounds.playHover();
+                onOpenCommand();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] font-mono text-slate-300 hover:border-emerald-500/30 hover:text-white transition-colors"
+              title="Command Palette (Cmd + K / Ctrl + K)"
+            >
+              <Search className="w-3 h-3 text-emerald-400" />
+              <span className="hidden sm:inline">⌘K</span>
+            </button>
+
+            {/* Synthesized Audio FX Toggle */}
+            <button
+              onClick={handleToggleAudio}
+              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+              title={audioEnabled ? "Mute Sound Effects" : "Enable Sound Effects"}
+              aria-label="Toggle sound effects"
+            >
+              {audioEnabled ? (
+                <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5 text-slate-500" />
+              )}
+            </button>
+
             {/* Theme Toggle */}
             {mounted && (
               <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                onClick={() => {
+                  sounds.playClick();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
                 className="relative flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
                 aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
               >
@@ -153,7 +207,10 @@ export function Navbar({ onOpenResume }: NavbarProps) {
 
             {/* Resume Action */}
             <button
-              onClick={onOpenResume}
+              onClick={() => {
+                sounds.playClick();
+                onOpenResume();
+              }}
               className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all duration-200"
             >
               <FileText className="h-3.5 w-3.5" />
@@ -162,7 +219,10 @@ export function Navbar({ onOpenResume }: NavbarProps) {
 
             {/* Mobile Menu Toggle Button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                sounds.playClick();
+                setMobileMenuOpen(!mobileMenuOpen);
+              }}
               className="flex md:hidden h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 hover:text-white"
               aria-label="Toggle navigation menu"
             >
@@ -204,6 +264,17 @@ export function Navbar({ onOpenResume }: NavbarProps) {
               })}
 
               <div className="pt-3 mt-1 border-t border-white/10 flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenCommand();
+                  }}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition-colors"
+                >
+                  <Search className="w-4 h-4 text-emerald-400" />
+                  <span>Open Command Palette (⌘K)</span>
+                </button>
+
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
