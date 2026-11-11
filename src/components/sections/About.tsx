@@ -10,6 +10,7 @@ import {
   MapPin,
   GraduationCap,
 } from "lucide-react";
+import { AskSushanthAI } from "@/components/ui/AskSushanthAI";
 
 export function About() {
   const pillars = [
@@ -164,6 +165,18 @@ export function About() {
             );
           })}
         </div>
+
+        {/* Interactive "Ask Sushanth's AI" Intelligence Assistant */}
+        <motion.div
+          id="ask-ai"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-12"
+        >
+          <AskSushanthAI />
+        </motion.div>
       </div>
     </section>
   );

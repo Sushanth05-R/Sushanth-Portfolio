@@ -9,6 +9,7 @@ import confetti from "canvas-confetti";
 import {
   Search,
   X,
+  Bot,
   FileText,
   Smartphone,
   ExternalLink,
@@ -131,6 +132,17 @@ export function CommandMenu({
       },
 
       // Actions
+      {
+        id: "action-ask-ai",
+        title: "Ask Sushanth's AI Assistant",
+        category: "Actions",
+        icon: Bot,
+        shortcut: "A",
+        perform: () => {
+          document.getElementById("ask-ai")?.scrollIntoView({ behavior: "smooth" });
+          onClose();
+        },
+      },
       {
         id: "action-resume",
         title: "View & Download Resume",
